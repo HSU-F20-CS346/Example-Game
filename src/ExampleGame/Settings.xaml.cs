@@ -25,6 +25,7 @@ namespace ExampleGame
 
         public int RemotePort { get; set; }
         public int LocalPort { get; set; }
+        public bool ModalResult { get; private set; }
         
 
         public Settings()
@@ -45,11 +46,13 @@ namespace ExampleGame
             {
                 LocalPort = port;
             }
+            ModalResult = true;
             this.Close();
         }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
+            ModalResult = false;
             this.Close();
         }
     }

@@ -44,7 +44,6 @@ namespace ExampleGame
             InitializePlayer(LocalPlayer);
             InitializePlayer(RemotePlayer);
 
-            StartServerLoop();
         }
 
         private void GameScene_MouseMove(object sender, MouseEventArgs e)
@@ -72,13 +71,16 @@ namespace ExampleGame
         {
             Settings s = new Settings();
             s.ShowDialog();
-            ClientIpAddress = s.IpAddress;
-            ListenPort = s.LocalPort;
-            RemotePort = s.RemotePort;
+            if(s.ModalResult == true)
+            {
+                ClientIpAddress = s.IpAddress;
+                ListenPort = s.LocalPort;
+                RemotePort = s.RemotePort;
 
-            //I think this will create a new thread every time we edit settings.
-            //Definitely not a great idea but works for our proof of concept.
-            StartServerLoop();
+                //I think this will create a new thread every time we edit settings.
+                //Definitely not a great idea but works for our proof of concept.
+                StartServerLoop();
+            }
         }
 
         private void SendUpdate(double xPos, double yPos)
