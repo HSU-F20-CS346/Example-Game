@@ -42,7 +42,7 @@ namespace ExampleGame
             {
                 RemotePort = port;
             }
-            if(Int32.TryParse(ClientIpAddress.Text, out port))
+            if(Int32.TryParse(LocalListenPort.Text, out port))
             {
                 LocalPort = port;
             }
