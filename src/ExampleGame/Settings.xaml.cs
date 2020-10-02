@@ -22,6 +22,11 @@ namespace ExampleGame
             get;
             private set;
         }
+
+        public int RemotePort { get; set; }
+        public int LocalPort { get; set; }
+        
+
         public Settings()
         {
             InitializeComponent();
@@ -31,6 +36,15 @@ namespace ExampleGame
         private void OkButton_Click(object sender, RoutedEventArgs e)
         {
             IpAddress = ClientIpAddress.Text;
+            int port = -1;
+            if(Int32.TryParse(ClientRemotePort.Text, out port))
+            {
+                RemotePort = port;
+            }
+            if(Int32.TryParse(ClientRemotePort.Text, out port))
+            {
+                LocalPort = port;
+            }
             this.Close();
         }
 

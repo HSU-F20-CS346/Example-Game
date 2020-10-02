@@ -29,19 +29,35 @@ namespace ExampleGame
         string ClientIpAddress { get; set; }
         Thread serverThread = null;
         int ListenPort = 3461;
+        int RemotePort = 3461;
 
         public MainWindow()
         {
             InitializeComponent();
+            ClientIpAddress = "";
             LocalPlayer = new Player();
             RemotePlayer = new Player();
+            RemotePlayer.PlayerShape.Fill = Brushes.BlueViolet;
 
-            this.KeyDown += KeyPressDetected;
+            this.MouseMove += GameScene_MouseMove;
 
             InitializePlayer(LocalPlayer);
             InitializePlayer(RemotePlayer);
 
             StartServerLoop();
+        }
+
+        private void GameScene_MouseMove(object sender, MouseEventArgs e)
+        {
+            var position = e.GetPosition(GameScene);
+            position.X -= LocalPlayer.ActualWidth / 2;
+            position.Y -= LocalPlayer.ActualHeight / 2;
+            if(position.X > 0 && position.Y > 0)
+            {
+                Canvas.SetTop(LocalPlayer, position.Y);
+                Canvas.SetLeft(LocalPlayer, position.X);
+            }
+            SendUpdate(position.X, position.Y);
         }
 
         void InitializePlayer(Player p)
@@ -51,39 +67,21 @@ namespace ExampleGame
             Canvas.SetTop(p, 0);
         }
 
-        private void KeyPressDetected(object sender, KeyEventArgs e)
-        {
-            switch (e.Key)
-            {
-                case Key.Up:
-                    Canvas.SetTop(LocalPlayer, Canvas.GetTop(LocalPlayer) - 1);
-                    break;
-
-                case Key.Down:
-                    Canvas.SetTop(LocalPlayer, Canvas.GetTop(LocalPlayer) + 1);
-                    break;
-
-                case Key.Left:
-                    Canvas.SetLeft(LocalPlayer, Canvas.GetLeft(LocalPlayer) - 1);
-                    break;
-
-                case Key.Right:
-                    Canvas.SetLeft(LocalPlayer, Canvas.GetLeft(LocalPlayer) + 1);
-                    break;
-            }
-
-            //TODO: update with real coords
-            SendUpdate(0, 0);
-        }
 
         private void SetRemoteIpClicked(object sender, RoutedEventArgs e)
         {
             Settings s = new Settings();
             s.ShowDialog();
             ClientIpAddress = s.IpAddress;
+            ListenPort = s.LocalPort;
+            RemotePort = s.RemotePort;
+
+            //I think this will create a new thread every time we edit settings.
+            //Definitely not a great idea but works for our proof of concept.
+            StartServerLoop();
         }
 
-        private void SendUpdate(int xPos, int yPos)
+        private void SendUpdate(double xPos, double yPos)
         {
             UdpClient client = new UdpClient();
             byte[] package = new byte[1024];
@@ -91,7 +89,10 @@ namespace ExampleGame
             //TODO: build package payload
             try
             {
-                client.Send(package, package.Length, ClientIpAddress, ListenPort);
+                if(ClientIpAddress.Length > 0)
+                {
+                    client.Send(package, package.Length, ClientIpAddress, RemotePort);
+                }
             }
             catch(Exception ex)
             {
